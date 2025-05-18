@@ -66,7 +66,7 @@ fig.update_layout(
     margin=dict(t=50, l=25, r=25, b=25),
     font=dict(size=12),
     title={
-        'text': 'Projects by Cluster Label',
+        'text': 'Sundai Projects by Cluster Label',
         'x': 0.5,
         'xanchor': 'center',
         'font': {'size': 24}
@@ -83,7 +83,7 @@ fig.update_layout(
 
 # Add a title to the figure
 fig.update_layout(
-    title_text="Projects by Cluster Label",
+    title_text="Sundai Projects by Cluster Label",
     title_x=0.5,
     title_font_size=24
 )
