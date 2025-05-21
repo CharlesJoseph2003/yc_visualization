@@ -90,3 +90,6 @@ fig.update_layout(
 
 # Show the figure in the browser
 fig.show()
+
+# Save the figure as an HTML file
+fig.write_html("path/to/file.html")
