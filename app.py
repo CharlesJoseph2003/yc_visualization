@@ -30,7 +30,6 @@ def create_treemap(df):
         df,
         path=['cluster_label', 'title'],  # Hierarchy: cluster_label -> title
         title='Sundai Projects by Cluster Label',
-        width=1500,  # Wider to fit more content
         height=800,  # Taller to fit more content
         values='count',  # Scale rectangles by count
         hover_data=['short_description'],  # Include shortened description in hover data
@@ -83,10 +82,11 @@ app.layout = html.Div([
         dcc.Graph(
             id='treemap-graph',
             figure=create_treemap(df),
-            style={'height': '80vh', 'width': '100%'}
+            style={'height': '80vh', 'width': '100%'},
+            config={'responsive': True}
         )
-    ], style={'display': 'flex', 'justifyContent': 'center', 'alignItems': 'center'}),
-    
+    ], style={'width': '100%', 'display': 'flex', 'justifyContent': 'center', 'alignItems': 'center'}),
+ 
     html.Footer([
         html.P("Sundai Projects Visualization Dashboard", 
                style={'textAlign': 'center', 'marginTop': '20px', 'color': '#666'})
