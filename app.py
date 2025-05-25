@@ -6,47 +6,56 @@ import plotly.express as px
 import os
 
 # Initialize the Dash app
-app = dash.Dash(__name__, title="Sundai Projects Visualization")
+app = dash.Dash(__name__, title="Sundai Projects")
 server = app.server  # Needed for deployment platforms like Render
 
 # Load the data
 def load_data():
-    df = pd.read_csv('data_sundai_data.csv')
+    df = pd.read_csv('studio_results_20250518_1837.csv')
     # Select the columns we want
-    new_df = df[['title', 'cluster_label', 'description', 'color']]
+    new_df = df[['id', 'title', 'preview', 'description', 'status','is_starred','launchLeadId','hack_type','thumbnailId','blogUrl','is_broken','githubUrl','demoUrl','startDate','endDate','createdAt','updatedAt']]
     # Drop any rows with missing values in the required columns
-    new_df = new_df.dropna(subset=['title', 'cluster_label'])
-    # Create a count column for sizing
-    new_df['count'] = 1
-    # Truncate long descriptions for hover to keep them compact
-    new_df['short_description'] = new_df['description'].apply(
-        lambda x: (x[:100] + '...') if isinstance(x, str) and len(x) > 100 else x
+    new_df = new_df.dropna(subset=['title'])
+    # Create a count column for sizing based on starred status and description length
+    new_df['count'] = new_df.apply(lambda row: 
+        10 if row['is_starred'] and isinstance(row['description'], str) and len(row['description']) >= 50
+        else 0 if not isinstance(row['description'], str) or len(row['description']) < 50
+        else 1
+    , axis=1)
+    # Create hyperlinked titles
+    new_df['linked_title'] = new_df.apply(
+        lambda row: f'<a href="https://sundai.club/projects/{row["id"]}" style="color: black; text-decoration: none; target="_blank">{row["title"]}</a>', axis=1
     )
+    # Truncate long descriptions for hover to keep them compact
+    new_df['short_description'] = new_df['preview']#+':'+new_df['description'].apply(
+        #lambda x: (x[:100] + '...') if isinstance(x, str) and len(x) > 100 else x
+    #)
     return new_df
 
 # Create the treemap figure
 def create_treemap(df):
     fig = px.treemap(
         df,
-        path=['cluster_label', 'title'],  # Hierarchy: cluster_label -> title
-        title='Sundai Projects by Cluster Label',
+        path=['launchLeadId', 'linked_title'],  # Hierarchy using linked titles
+        title='Sundai Projects by Launch Lead',
         height=800,  # Taller to fit more content
         values='count',  # Scale rectangles by count
         hover_data=['short_description'],  # Include shortened description in hover data
         custom_data=['short_description'],  # Include for potential JavaScript use
         hover_name='title',  # Use title as the main hover title
-        color='cluster_label',  # Color by cluster_label
+        color='launchLeadId',  # Color by cluster_label
         branchvalues='total'  # Ensure proper sizing
     )
 
     # Update hover template to include more information but keep it compact
     fig.update_traces(
-        hovertemplate='<b>%{label}</b><br>%{customdata[0]}<br><i>Cluster: %{parent}</i>',
+        hovertemplate='%{customdata[0]}',
         texttemplate='%{label}',
         textposition='middle center',  # Center text
         insidetextfont=dict(size=11),  # Slightly smaller font for better fit
         marker_line_width=0.5,  # Thin lines between cells
         marker_line_color='white',
+        hoverinfo='skip',  # This will hide hover for non-leaf nodes
     )
 
     # Update layout for better readability
