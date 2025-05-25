@@ -8,12 +8,13 @@ Just pip install requirements.txt and run sundai.py
 
 **How it Works**: Ingest data from Sundai Club database, create a clickable structure, offer compelling interaction:
  - View the tags
- - 
+ - View the clusters
 
-**Marketing**:
+**Marketing**: A so
 
 ---
 > Written with [StackEdit](https://stackedit.io/).
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTE4NTI5MDQwOCwxOTQ2NTM1NTU2XX0=
+eyJoaXN0b3J5IjpbLTMyMTc0NTYwMCwtMTg1MjkwNDA4LDE5ND
+Y1MzU1NTZdfQ==
 -->
