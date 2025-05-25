@@ -10,11 +10,11 @@ Just pip install requirements.txt and run sundai.py
  - View the tags
  - View the clusters
 
-**Marketing**: Copy about the goal of the project, which will be shared.
+**Marketing**: Copy about the goal of the project, which will be shared with some screenshots.
 
 ---
 > Written with [StackEdit](https://stackedit.io/).
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTg4MDU4OTQ2MywtMTg1MjkwNDA4LDE5ND
-Y1MzU1NTZdfQ==
+eyJoaXN0b3J5IjpbLTExNjI5NTAwNTIsMTg4MDU4OTQ2MywtMT
+g1MjkwNDA4LDE5NDY1MzU1NTZdfQ==
 -->
