@@ -130,7 +130,10 @@ app.layout = html.Div([
  
     html.Footer([
         html.P("Click on the name of a box to open the hack page. The area of each hack is proportional to popularity. Zoom in to see the detail!", 
-               style={'textAlign': 'center', 'marginTop': '20px', 'color': '#666'})
+               style={'textAlign': 'center', 'marginTop': '20px', 'color': '#666'}),
+        html.P("Project by Jordan Tian, Charles Joseph, Aleks Jakulin, Jack Yu, Jonas Schafer, with help from Artem Lukoianov.",
+               style={'textAlign': 'center', 'marginTop': '20px', 'color': '#666'}),
+        html.A("Hack Home Page", href="https://www.sundai.club/projects/c5be2116-c856-4aad-a852-b257d264d3e9", target="_blank", style={'textAlign': 'center', 'marginTop': '20px', 'color': '#666'}),
     ])
 ], style={'fontFamily': 'Arial, sans-serif', 'margin': '0 auto', 'maxWidth': '1800px', 'display': 'flex', 'flexDirection': 'column', 'alignItems': 'center'})
 
