@@ -1,4 +1,4 @@
-Just pip install requirements.txt and run sundai.py 
+Just pip install requirements.txt and run app.py 
 
 ---
 
