@@ -117,25 +117,32 @@ def create_treemap(df):
 
 # Define the app layout
 app.layout = html.Div([
-    html.H1("Sundai Projects Visualization", style={'textAlign': 'center', 'marginTop': '20px'}),
+        html.Script("""<script>
+        !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init be ys Ss me gs ws capture Ne calculateEventProperties xs register register_once register_for_session unregister unregister_for_session Rs getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey canRenderSurveyAsync identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty Is ks createPersonProfile Ps bs opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing $s debug Es getPageViewId captureTraceFeedback captureTraceMetric".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+        posthog.init('phc_W56RYVhEsXxwY3dVEDBfQRVvkMwjJ4dTOLq7Zb2lCZb', {
+            api_host: 'https://us.i.posthog.com',
+            person_profiles: 'identified_only', // or 'always' to create profiles for anonymous users as well
+        })
+        </script>"""),
+        html.H1("Sundai Projects Visualization", style={'textAlign': 'center', 'marginTop': '20px'}),
+        
+        html.Div([
+            dcc.Graph(
+                id='treemap-graph',
+                figure=create_treemap(df),
+                style={'height': '80vh', 'width': '100%'},
+                config={'responsive': True}
+            )
+        ], style={'width': '100%', 'display': 'flex', 'justifyContent': 'center', 'alignItems': 'center'}),
     
-    html.Div([
-        dcc.Graph(
-            id='treemap-graph',
-            figure=create_treemap(df),
-            style={'height': '80vh', 'width': '100%'},
-            config={'responsive': True}
-        )
-    ], style={'width': '100%', 'display': 'flex', 'justifyContent': 'center', 'alignItems': 'center'}),
- 
-    html.Footer([
-        html.P("Click on the name of a box to open the hack page. The area of each hack is proportional to popularity. Zoom in to see the detail!", 
-               style={'textAlign': 'center', 'marginTop': '20px', 'color': '#666'}),
-        html.P("Project by Jordan Tian, Charles Joseph, Aleks Jakulin, Jack Yu, Jonas Schafer, with help from Artem Lukoianov.",
-               style={'textAlign': 'center', 'marginTop': '20px', 'color': '#666'}),
-        html.A("Hack Home Page", href="https://www.sundai.club/projects/c5be2116-c856-4aad-a852-b257d264d3e9", target="_blank", style={'textAlign': 'center', 'marginTop': '20px', 'color': '#666'}),
-    ])
-], style={'fontFamily': 'Arial, sans-serif', 'margin': '0 auto', 'maxWidth': '1800px', 'display': 'flex', 'flexDirection': 'column', 'alignItems': 'center'})
+        html.Footer([
+            html.P("Click on the name of a box to open the hack page. The area of each hack is proportional to popularity. Zoom in to see the detail!", 
+                style={'textAlign': 'center', 'marginTop': '20px', 'color': '#666'}),
+            html.P("Project by Jordan Tian, Charles Joseph, Aleks Jakulin, Jack Yu, Jonas Schafer, with help from Artem Lukoianov.",
+                style={'textAlign': 'center', 'marginTop': '20px', 'color': '#666'}),
+            html.A("Hack Home Page", href="https://www.sundai.club/projects/c5be2116-c856-4aad-a852-b257d264d3e9", target="_blank", style={'textAlign': 'center', 'marginTop': '20px', 'color': '#666'}),
+        ])
+    ], style={'fontFamily': 'Arial, sans-serif', 'margin': '0 auto', 'maxWidth': '1800px', 'display': 'flex', 'flexDirection': 'column', 'alignItems': 'center'})
 
 # No callbacks needed since we removed the filter
 
