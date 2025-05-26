@@ -63,7 +63,7 @@ def create_treemap(df):
         margin=dict(t=50, l=25, r=25, b=25),
         font=dict(size=12),
         title={
-            'text': 'Sundai Projects by Cluster Label',
+            'text': 'Sundai Projects by Launch Lead',
             'x': 0.5,
             'xanchor': 'center',
             'font': {'size': 24}
