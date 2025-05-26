@@ -4,6 +4,11 @@ from dash.dependencies import Input, Output
 import pandas as pd
 import plotly.express as px
 import os
+from dotenv import load_dotenv
+import dataset
+
+# Load environment variables
+load_dotenv()
 
 # Initialize the Dash app
 app = dash.Dash(__name__, title="Sundai Projects")
@@ -11,39 +16,69 @@ server = app.server  # Needed for deployment platforms like Render
 
 # Load the data
 def load_data():
-    df = pd.read_csv('studio_results_20250518_1837.csv')
-    # Select the columns we want
-    new_df = df[['id', 'title', 'preview', 'description', 'status','is_starred','launchLeadId','hack_type','thumbnailId','blogUrl','is_broken','githubUrl','demoUrl','startDate','endDate','createdAt','updatedAt']]
-    # Drop any rows with missing values in the required columns
-    new_df = new_df.dropna(subset=['title'])
+    df_q = db.query("""
+SELECT
+  p.id AS id,
+  p.title AS title,
+  p.preview AS preview,
+  p.description AS description,
+  h.name AS launchLeadId,
+  p.is_starred AS is_starred,
+  COUNT(pl.id) AS count
+FROM
+  public."Project" p
+JOIN
+  public."Hacker" h ON p."launchLeadId" = h.id
+LEFT JOIN
+  public."ProjectLike" pl ON pl."projectId" = p.id
+WHERE
+  NOT p.is_broken
+  AND p.status = 'APPROVED'::"ProjectStatus"
+GROUP BY
+  p.id, p.title, h.name
+ORDER BY
+  count DESC;
+""")
+    df = pd.DataFrame([row for row in df_q])
     # Create a count column for sizing based on starred status and description length
-    new_df['count'] = new_df.apply(lambda row: 
-        10 if row['is_starred'] and isinstance(row['description'], str) and len(row['description']) >= 50
-        else 0 if not isinstance(row['description'], str) or len(row['description']) < 50
-        else 1
-    , axis=1)
+    df['count'] = df.apply(lambda row: row['count'] if row['is_starred'] else row['count'] / 2, axis=1)
     # Create hyperlinked titles
-    new_df['linked_title'] = new_df.apply(
+    df['linked_title'] = df.apply(
         lambda row: f'<a href="https://sundai.club/projects/{row["id"]}" style="color: black; text-decoration: none; target="_blank">{row["title"]}</a>', axis=1
     )
     # Truncate long descriptions for hover to keep them compact
-    new_df['short_description'] = new_df['preview']#+':'+new_df['description'].apply(
-        #lambda x: (x[:100] + '...') if isinstance(x, str) and len(x) > 100 else x
-    #)
-    return new_df
+    df['short_description'] = df['title']+': '+df['preview']
+
+    # Save DataFrame to CSV
+    #df.to_csv('hacks.csv', index=False)
+    return df
+
+# Load the data
+try:
+    # Get database URL from environment
+    db_url = os.getenv('DB_URL')
+    # Connect to database
+    db = dataset.connect(db_url)
+
+    df = load_data()
+except: 
+    # use cached
+    print("Using cached data")
+    df = pd.read_csv('hacks.csv')
+
 
 # Create the treemap figure
 def create_treemap(df):
     fig = px.treemap(
         df,
-        path=['launchLeadId', 'linked_title'],  # Hierarchy using linked titles
+        path=['launchleadid', 'linked_title'],  # Hierarchy using linked titles
         title='Sundai Projects by Launch Lead',
         height=800,  # Taller to fit more content
         values='count',  # Scale rectangles by count
         hover_data=['short_description'],  # Include shortened description in hover data
         custom_data=['short_description'],  # Include for potential JavaScript use
         hover_name='title',  # Use title as the main hover title
-        color='launchLeadId',  # Color by cluster_label
+        color='launchleadid',  # Color by cluster_label
         branchvalues='total'  # Ensure proper sizing
     )
 
@@ -80,9 +115,6 @@ def create_treemap(df):
     
     return fig
 
-# Load the data
-df = load_data()
-
 # Define the app layout
 app.layout = html.Div([
     html.H1("Sundai Projects Visualization", style={'textAlign': 'center', 'marginTop': '20px'}),
@@ -97,7 +129,7 @@ app.layout = html.Div([
     ], style={'width': '100%', 'display': 'flex', 'justifyContent': 'center', 'alignItems': 'center'}),
  
     html.Footer([
-        html.P("Sundai Projects Visualization Dashboard", 
+        html.P("Click on the name of a box to open the hack page. The area of each hack is proportional to popularity. Zoom in to see the detail!", 
                style={'textAlign': 'center', 'marginTop': '20px', 'color': '#666'})
     ])
 ], style={'fontFamily': 'Arial, sans-serif', 'margin': '0 auto', 'maxWidth': '1800px', 'display': 'flex', 'flexDirection': 'column', 'alignItems': 'center'})
