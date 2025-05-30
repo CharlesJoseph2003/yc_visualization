@@ -158,9 +158,15 @@ def create_app():
         ], style={'fontFamily': 'Arial, sans-serif', 'margin': '0 auto', 'maxWidth': '1800px', 'display': 'flex', 'flexDirection': 'column', 'alignItems': 'center'})
     return app
 
+# Load environment variables at module level
 load_dotenv()
+
+# Create the application
 app = create_app()
 
-# Run the app
+# For Gunicorn compatibility, expose the Flask server
+server = app.server
+
+# Run the app if executed directly
 if __name__ == '__main__':
     app.run(debug=False, host='0.0.0.0', port=int(os.environ.get('PORT', 8050)))
