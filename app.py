@@ -158,9 +158,9 @@ def create_app():
         ], style={'fontFamily': 'Arial, sans-serif', 'margin': '0 auto', 'maxWidth': '1800px', 'display': 'flex', 'flexDirection': 'column', 'alignItems': 'center'})
     return app
 
+load_dotenv()
+app = create_app()
+
 # Run the app
 if __name__ == '__main__':
-    # Load environment variables
-    load_dotenv()
-    app = create_app()
     app.run(debug=False, host='0.0.0.0', port=int(os.environ.get('PORT', 8050)))
