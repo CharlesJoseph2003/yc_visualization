@@ -1,5 +1,5 @@
 import dash
-from dash import dcc, html
+from dash import dcc, html, callback  
 from dash.dependencies import Input, Output
 import pandas as pd
 import plotly.express as px
@@ -7,15 +7,11 @@ import os
 from dotenv import load_dotenv
 import dataset
 
-# Load environment variables
-load_dotenv()
-
-# Initialize the Dash app
-app = dash.Dash(__name__, title="Sundai Projects")
-server = app.server  # Needed for deployment platforms like Render
 
 # Load the data
 def load_data():
+    db_url = os.getenv('DB_URL')
+    db = dataset.connect(db_url)
     df_q = db.query("""
 SELECT
   p.id AS id,
@@ -50,29 +46,14 @@ ORDER BY
     df['short_description'] = df['title']+': '+df['preview']
 
     # Save DataFrame to CSV
-    #df.to_csv('hacks.csv', index=False)
+    df.to_csv('hacks.csv', index=False)
     return df
-
-# Load the data
-try:
-    # Get database URL from environment
-    db_url = os.getenv('DB_URL')
-    # Connect to database
-    db = dataset.connect(db_url)
-
-    df = load_data()
-except: 
-    # use cached
-    print("Using cached data")
-    df = pd.read_csv('hacks.csv')
-
 
 # Create the treemap figure
 def create_treemap(df):
     fig = px.treemap(
         df,
         path=['launchleadid', 'linked_title'],  # Hierarchy using linked titles
-        title='Sundai Projects by Launch Lead',
         height=800,  # Taller to fit more content
         values='count',  # Scale rectangles by count
         hover_data=['short_description'],  # Include shortened description in hover data
@@ -97,12 +78,6 @@ def create_treemap(df):
     fig.update_layout(
         margin=dict(t=50, l=25, r=25, b=25),
         font=dict(size=12),
-        title={
-            'text': 'Sundai Projects by Launch Lead',
-            'x': 0.5,
-            'xanchor': 'center',
-            'font': {'size': 24}
-        },
         hoverlabel=dict(
             bgcolor="white",
             font_size=12,  # Smaller font for hover
@@ -115,7 +90,18 @@ def create_treemap(df):
     
     return fig
 
-app.index_string = '''
+@callback(Output('treemap-graph', 'figure'),
+              Input('interval-component', 'n_intervals'))
+def update_graph_live(n):
+    df = load_data()
+    return create_treemap(df)
+
+def create_app():
+    # Initialize the Dash app
+    app = dash.Dash(__name__, title="Sundai Projects")
+    server = app.server  # Needed for deployment platforms like Render
+
+    app.index_string = '''
 <!DOCTYPE html>
 <html>
     <head>
@@ -139,31 +125,42 @@ app.index_string = '''
             {%renderer%}
         </footer>
     </body>
-</html>
-'''
+</html>'''
 
-# Define the app layout
-app.layout = html.Div([
-        html.H1("Sundai Projects Visualization", style={'textAlign': 'center', 'marginTop': '20px'}),
-        
-        html.Div([
-            dcc.Graph(
-                id='treemap-graph',
-                figure=create_treemap(df),
-                style={'height': '80vh', 'width': '100%'},
-                config={'responsive': True}
-            )
-        ], style={'width': '100%', 'display': 'flex', 'justifyContent': 'center', 'alignItems': 'center'}),
-    
-        html.Footer([
+    # Define the app layout
+    app.layout = html.Div([
+            html.H1([
+                html.A("Sundai Projects Visualization", 
+                       href="https://www.sundai.club/projects/c5be2116-c856-4aad-a852-b257d264d3e9",
+                       target="_blank",
+                       style={'color': 'inherit', 'textDecoration': 'none'})
+            ], style={'textAlign': 'center', 'marginTop': '20px'}),
+            
             html.P("Click on the name of a box to open the hack page. The area of each hack is proportional to popularity. Zoom in to see the detail!", 
                 style={'textAlign': 'center', 'marginTop': '20px', 'color': '#666'}),
             html.P("Project by Jordan Tian, Charles Joseph, Aleks Jakulin, Jack Yu, Jonas Schafer, with help from Artem Lukoianov.",
                 style={'textAlign': 'center', 'marginTop': '20px', 'color': '#666'}),
-            html.A("Hack Home Page", href="https://www.sundai.club/projects/c5be2116-c856-4aad-a852-b257d264d3e9", target="_blank", style={'textAlign': 'center', 'marginTop': '20px', 'color': '#666'}),
-        ])
-    ], style={'fontFamily': 'Arial, sans-serif', 'margin': '0 auto', 'maxWidth': '1800px', 'display': 'flex', 'flexDirection': 'column', 'alignItems': 'center'})
+
+            html.Div([
+                dcc.Graph(
+                    id='treemap-graph',
+                    style={'height': '80vh', 'width': '100%'},
+                    figure=create_treemap(load_data()),
+                    config={'responsive': True}
+                ),
+                dcc.Interval(
+                    id='interval-component',
+                    interval=60*60*1000, # in milliseconds
+                    n_intervals=0
+                )
+            ], style={'width': '100%', 'display': 'flex', 'justifyContent': 'center', 'alignItems': 'center'}),
+        
+        ], style={'fontFamily': 'Arial, sans-serif', 'margin': '0 auto', 'maxWidth': '1800px', 'display': 'flex', 'flexDirection': 'column', 'alignItems': 'center'})
+    return app
 
 # Run the app
 if __name__ == '__main__':
-    app.run_server(debug=False, host='0.0.0.0', port=int(os.environ.get('PORT', 8050)))
+    # Load environment variables
+    load_dotenv()
+    app = create_app()
+    app.run(debug=False, host='0.0.0.0', port=int(os.environ.get('PORT', 8050)))
